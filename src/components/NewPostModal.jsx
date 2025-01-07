@@ -1,17 +1,25 @@
-import {useState} from 'react'
+import {useState, useContext} from 'react'
 import {Button, Form, Modal} from 'react-bootstrap'
 import { savePost } from "../features/postsSlice"
 import { useDispatch } from "react-redux"
+import {AuthContext} from './AuthProvider'
 
 export default function NewPostModal ({show, handleClose}) {
     const [postContent, setPostContent] = useState('')
+    const [file, setFile] = useState(null)
     const dispatch = useDispatch()
+    const {currentUser} = useContext(AuthContext)
+    const userId = currentUser.uid
     
     const handleSave = () => {
-        dispatch(savePost(postContent))
-        console.log(postContent);
+        dispatch(savePost({userId, postContent, file}))
         handleClose();
         setPostContent('')
+        setFile(null)
+    }
+
+    const handleFileChange = (e) => {
+        setFile(e.target.files[0])
     }
 
 
@@ -26,7 +34,9 @@ export default function NewPostModal ({show, handleClose}) {
                                 placeholder="What is happening" 
                                 as='textarea' 
                                 rows={3} 
-                                onChange={(e) => setPostContent(e.target.value)} />        
+                                onChange={(e) => setPostContent(e.target.value)} />    
+                                <br />
+                                <Form.Control type='file' onChange={handleFileChange} />
                         </Form.Group>
                     </Form>
                 </Modal.Body>

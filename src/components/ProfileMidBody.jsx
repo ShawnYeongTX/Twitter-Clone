@@ -1,18 +1,23 @@
 import {Button, Col, Image, Nav, Row, Spinner} from 'react-bootstrap'
 import ProfilePostCard from './ProfilePostCard'
-import { jwtDecode } from 'jwt-decode'
-import { useEffect } from 'react'
+// import { jwtDecode } from 'jwt-decode'
+import { useEffect, useContext } from 'react'
 import {useDispatch, useSelector} from 'react-redux'
 import { fetchPostsByUser } from '../features/postsSlice'
+import {AuthContext} from './AuthProvider'
+import coverImage from '../assets/cover-image.jpg'
+// import { current } from '@reduxjs/toolkit'
 
 export default function ProfileMidBody() {
     
-    const url = 'https://pbs.twimg.com/profile_banners/83072625/1602845571/1500x500'
+    const url = coverImage
     const pic = 'https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg'
 
     const dispatch = useDispatch()
-    const posts = useSelector(store => store.posts.posts)
-    const loading = useSelector(store => store.posts.loading)
+
+    const posts = useSelector((state) => state.posts.posts)
+    const loading = useSelector((state) => state.posts.loading)
+    const {currentUser} = useContext(AuthContext)
 
     // const fetchPosts = (userId) => {
     //     fetch (`https://91b8f362-6769-4c24-9f3a-a3f50858e94b-00-1xltvnylqob4.pike.replit.dev/posts/user/${userId}`)
@@ -23,13 +28,8 @@ export default function ProfileMidBody() {
     
 
     useEffect(() => {
-        const token = localStorage.getItem('authtoken')
-        if(token) {
-            const decodedToken = jwtDecode(token);
-            const userId = decodedToken.id;
-            dispatch(fetchPostsByUser(userId))
-        }
-    },[dispatch])
+        dispatch(fetchPostsByUser(currentUser.uid))
+    },[dispatch, currentUser])
     
     
     return (
@@ -82,7 +82,7 @@ export default function ProfileMidBody() {
             {loading && (<Spinner animation='border' className='ms-3 mt-3' variant='primary'/>)}
             
             {posts.length > 0 && posts.map((post) => (
-                <ProfilePostCard key={post.id} content={post.content} postId={post.id}/>
+                <ProfilePostCard key={post.id} post={post}/>
             ))}
         </Col>
 

@@ -13,7 +13,7 @@ export default function IconButton({isTop, className, onClick, text}) {
     
     return (
         <Button variant={margin} onClick={onClick}>
-            <i className={className + iconMargin} style={{fontSize: '20px', color: isTop? 'dodgerblue': 'black'}}>
+            <i className={className + iconMargin} style={{fontSize: '18px', color: isTop? 'dodgerblue': 'black'}}>
                 {text}
             </i>
         </Button>

@@ -1,34 +1,37 @@
 import {Row, Image, Col, Button, Modal, Form} from 'react-bootstrap'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'  
-import axios from 'axios'
+// import axios from 'axios'
 import useLocalStorage from 'use-local-storage'
+import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from 'firebase/auth'
+import { AuthContext } from '../components/AuthProvider'
+import { current } from '@reduxjs/toolkit'
 
 
 export default function AuthPage() {
     const loginImage = "https://sig1.co/img-twitter-1"
-    const url = "https://91b8f362-6769-4c24-9f3a-a3f50858e94b-00-1xltvnylqob4.pike.replit.dev" 
+    
     const [modalShow, setModalShow] = useState(null)
     const handleShowSignUp = () => setModalShow('SignUp')
     const handleShowLogin = () => setModalShow('Login') 
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
-    const [authtoken, setAuthToken] = useLocalStorage('authtoken', '')
+    // const [authtoken, setAuthToken] = useLocalStorage('authtoken', '')
+    const auth = getAuth()
+    const {currentUser} = useContext(AuthContext)
 
     const navigate = useNavigate()
 
     useEffect(() => {
-        if(authtoken) {
-            navigate('/profile')
-        }
-    }, [authtoken, navigate])
+        if(currentUser) navigate('/profile');
+    }, [currentUser, navigate])
 
     
     const handleSignup = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post(`${url}/signup`, {username, password})
-            console.log(res.data)
+            const res = await createUserWithEmailAndPassword(auth, username, password)
+            console.log(res.user)
         } catch (error) {
             console.error(error);
         }
@@ -37,16 +40,10 @@ export default function AuthPage() {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post(`${url}/login`, {username, password})
-            if(res.data && res.data.auth === true && res.data.token) {
-                localStorage.setItem("authToken", res.data.token);
-                setAuthToken(res.data.token)    
-                console.log("Login was successfully, token saved");
-            }
-            console.log(res.data) 
+            await signInWithEmailAndPassword(auth, username, password)
         } catch (error) {
-            console.error(error);
-        };
+            console.error(error)
+        }
     }
 
     const handleClose = () => setModalShow(null)
